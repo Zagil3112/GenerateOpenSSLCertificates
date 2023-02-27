@@ -13,11 +13,11 @@ import java.util.List;
 @SpringBootApplication
 public class GenerateCertificatesApplication {
 
+
     private static String arg1, arg2, pathStr, dirCMD;
     public static List<String> commands = new ArrayList<String>();
-
     // Nombre de la carpeta
-    private  static String folderName = "testCerts";
+    private  static String folderName = "testCerts3";
     static {
         OSPParameters(folderName);
     }
@@ -39,14 +39,15 @@ public class GenerateCertificatesApplication {
         agregarComando("echo 01 > " + dirCMD + "\\serial ");
         agregarComando("echo 1000 > " + dirCMD + "\\crlnumber");
 
-        crearArchivosConfiguracion2();
+        // Crear openssl.cnf
+        crearArchivosConfiguracion();
+        // Crear ext_template.cnf
         createTemplate("localhost",pathStr+"/certs");
 
-
-
-
+        // Generar llaves publica y privada de rootCA
         exec("openssl req -x509 -sha256 -days 3650 -newkey rsa:4096 -passout pass:123456 -keyout rootCA.key -out rootCA.crt -subj /CN=FAC/OU=CETAD/O=UCO/L=RIO/ST=ANT/C=CO",pathStr);
 
+        // Generar CRL
         exec("openssl ca -config openssl.cnf -gencrl -out ./crl/rootca.crl -passin pass:123456",pathStr);
 
 
@@ -70,7 +71,6 @@ public class GenerateCertificatesApplication {
 
 
     }
-
 
     public static void exec(String commandToExec, String actualFolder) throws IOException {
 
@@ -110,7 +110,7 @@ public class GenerateCertificatesApplication {
                 .toLowerCase().startsWith("windows");
     }
 
-    public static void crearArchivosConfiguracion2() throws IOException {
+    public static void crearArchivosConfiguracion() throws IOException {
 
         // Crear openssl.cnf
 
@@ -285,6 +285,9 @@ public class GenerateCertificatesApplication {
         commands.clear();
 
     }
+
+
+
 }
 
 
